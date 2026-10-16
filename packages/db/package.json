@@ -1,0 +1,21 @@
+{
+  "name": "@rs/db",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.15.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.15.0",
+    "typescript": "^5.4.5"
+  }
+}
