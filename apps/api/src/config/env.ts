@@ -10,7 +10,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32).default('reachinbox-scheduler-jwt-secret-at-least-32-characters-long'),
 
   // Database
-  DATABASE_URL: z.string().url().default('postgresql://postgres:postgres@localhost:5432/reachinbox'),
+  DATABASE_URL: z.string().url().default('postgresql://rs:rs@localhost:5433/reachinbox'),
 
   // Redis
   REDIS_URL: z.string().url().default('redis://localhost:6379'),

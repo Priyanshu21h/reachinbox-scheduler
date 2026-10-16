@@ -7,9 +7,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "migrate": "prisma migrate dev",
-    "generate": "prisma generate",
-    "migrate:deploy": "prisma migrate deploy"
+    "migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "generate": "dotenv -e ../../.env -- prisma generate",
+    "migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/client": "^5.15.0"

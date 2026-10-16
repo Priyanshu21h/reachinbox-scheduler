@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string().url().default('postgresql://postgres:postgres@localhost:5432/reachinbox'),
+  DATABASE_URL: z.string().url().default('postgresql://rs:rs@localhost:5433/reachinbox'),
   REDIS_URL: z.string().url().default('redis://localhost:6379'),
   WORKER_CONCURRENCY: z.coerce.number().int().positive().default(5),
   MIN_DELAY_BETWEEN_EMAILS_MS: z.coerce.number().int().min(0).default(2000),

@@ -8,8 +8,8 @@
   "scripts": {
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down",
-    "db:migrate": "npm run migrate --workspace=packages/db",
-    "db:generate": "npm run generate --workspace=packages/db",
+    "db:migrate": "dotenv -e .env -- npm run migrate --workspace=packages/db",
+    "db:generate": "dotenv -e .env -- npm run generate --workspace=packages/db",
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:worker": "npm run dev --workspace=apps/worker",
     "dev:web": "npm run dev --workspace=apps/web",
@@ -19,5 +19,8 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
   }
 }
