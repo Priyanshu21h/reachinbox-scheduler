@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSlackStatus, disconnectSlack } from '../../lib/api';
+import { API_BASE_URL, getSlackStatus, disconnectSlack } from '../../lib/api';
 import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 
@@ -43,7 +43,7 @@ export default function SlackControl() {
 
   return (
     <a
-      href="http://localhost:4000/slack/oauth/start"
+      href={`${API_BASE_URL}/slack/oauth/start`}
       id="slack-connect-btn"
       className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors px-2 py-1.5 rounded-lg hover:bg-slate-100"
     >

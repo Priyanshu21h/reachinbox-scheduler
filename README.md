@@ -76,6 +76,7 @@ A production-grade, distributed email scheduling service and modern dashboard bu
 
 For full architectural diagrams and deep-dive explanations, see [docs/architecture.md](file:///c:/Disk_D/reachinbox-scheduler/docs/architecture.md).  
 For architectural trade-offs and rationale, see [docs/trade-offs.md](file:///c:/Disk_D/reachinbox-scheduler/docs/trade-offs.md).
+For a Google Cloud VM production demo deployment, see [docs/deployment-gcp.md](docs/deployment-gcp.md).
 
 ---
 

@@ -1,0 +1,14 @@
+# Replace this hostname with the domain (or static-IP sslip.io hostname)
+# that you configure in Google OAuth and the Slack app.
+reachinbox.example.com {
+	encode zstd gzip
+
+	# Caddy removes /api before forwarding, so Express sees its normal routes.
+	handle_path /api/* {
+		reverse_proxy 127.0.0.1:4000
+	}
+
+	root * /opt/reachinbox-scheduler/apps/web/dist
+	try_files {path} /index.html
+	file_server
+}

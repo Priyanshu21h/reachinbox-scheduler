@@ -9,6 +9,7 @@ import {
   loginWithEmail,
   requestEmailRegistration,
   requestPasswordReset,
+  API_BASE_URL,
 } from '../../lib/api';
 
 type LoginMode = 'login' | 'register' | 'forgot' | 'setup' | 'reset' | 'sent';
@@ -182,7 +183,7 @@ export default function LoginPage() {
         {showGoogle && (
           <>
             <div className="auth-divider"><span /> <small>or continue with</small> <span /></div>
-            <a href="http://localhost:4000/auth/google" id="google-login-btn" className="google-signin auth-google-button">
+            <a href={`${API_BASE_URL}/auth/google`} id="google-login-btn" className="google-signin auth-google-button">
               <GoogleMark />
               Continue with Google
             </a>

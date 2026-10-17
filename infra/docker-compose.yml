@@ -1,14 +1,12 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16
     container_name: rs_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: rs
-      POSTGRES_PASSWORD: rs
-      POSTGRES_DB: reachinbox
+      POSTGRES_USER: ${POSTGRES_USER:-rs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rs}
+      POSTGRES_DB: ${POSTGRES_DB:-reachinbox}
     ports:
       - '127.0.0.1:5433:5432'
     volumes:

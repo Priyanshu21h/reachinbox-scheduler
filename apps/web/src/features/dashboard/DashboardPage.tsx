@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
-import { getDashboardStats, logout, type EmailQueryFilters } from '../../lib/api';
+import { API_BASE_URL, getDashboardStats, logout, type EmailQueryFilters } from '../../lib/api';
 import Avatar from '../../components/ui/Avatar';
 import Button from '../../components/ui/Button';
 import SlackControl from '../slack/SlackControl';
@@ -251,7 +251,7 @@ export default function DashboardPage() {
           <div className="mail-top-actions">
             <SlackControl />
             {user?.isAdmin && (
-              <a className="mail-admin-link" href="http://localhost:4000/admin/queues" target="_blank" rel="noreferrer" title="Open Bull Board queue monitor">
+              <a className="mail-admin-link" href={`${API_BASE_URL}/admin/queues`} target="_blank" rel="noreferrer" title="Open Bull Board queue monitor">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M4 19h16M7 16V8m5 8V5m5 11v-5"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M3 5h4v4H3zm7 8h4v4h-4zm7-5h4v4h-4z"/></svg>
                 <span>Queue monitor</span>
               </a>
