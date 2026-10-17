@@ -1,6 +1,7 @@
 import { DelayedError } from 'bullmq';
 import type { Job } from 'bullmq';
 import { prisma } from '@rs/db';
+import { decryptBytes } from '@rs/db';
 import type { SendEmailJobData } from '@rs/shared';
 import { logger } from '../logger.js';
 import { sendEmail } from '../services/mailer.service.js';
@@ -33,11 +34,11 @@ export async function sendEmailProcessor(
 
   // ─── Step 1: Atomic Claim ─────────────────────────────────────────────────
   // Raw query needed for UPDATE … RETURNING with conditional WHERE
-  const claimed = await prisma.$queryRaw<{ id: string; senderId: string; toEmail: string; subject: string; body: string; scheduledAt: Date; userId: string }[]>`
+  const claimed = await prisma.$queryRaw<{ id: string; senderId: string; toEmail: string; subject: string; body: string; scheduledAt: Date; userId: string; hourlyLimit: number | null }[]>`
     UPDATE "Email"
     SET status = 'SENDING', attempts = attempts + 1
     WHERE id = ${emailId} AND status IN ('SCHEDULED')
-    RETURNING id, "senderId", "toEmail", subject, body, "scheduledAt", "userId"
+    RETURNING id, "senderId", "toEmail", subject, body, "scheduledAt", "userId", "hourlyLimit"
   `;
 
   if (claimed.length === 0) {
@@ -46,7 +47,7 @@ export async function sendEmailProcessor(
   }
 
   const email = claimed[0]!;
-  jobLog.info({ toEmail: email.toEmail }, 'Claimed email for sending');
+  jobLog.info('Claimed email for sending');
 
   // Fetch sender
   const sender = await prisma.sender.findUnique({ where: { id: email.senderId } });
@@ -68,7 +69,7 @@ export async function sendEmailProcessor(
 
   // ─── Step 3: Hourly Rate Limit ───────────────────────────────────────────
   const window = getHourlyWindow();
-  const limit = effectiveHourlyLimit(sender.hourlyLimit);
+  const limit = effectiveHourlyLimit(sender.hourlyLimit, email.hourlyLimit);
   const { allowed } = await checkHourlyLimit(sender.id, limit, window);
 
   if (!allowed) {
@@ -100,7 +101,16 @@ export async function sendEmailProcessor(
 
   // ─── Step 4: Send Email ───────────────────────────────────────────────────
   try {
-    const result = await sendEmail(sender, email.toEmail, email.subject, email.body);
+    const emailWithAttachments = await prisma.email.findUnique({
+      where: { id: emailId },
+      include: { attachments: { include: { attachment: true } } },
+    });
+    const attachments = emailWithAttachments?.attachments.map(({ attachment }) => ({
+      filename: attachment.fileName,
+      contentType: attachment.contentType,
+      content: decryptBytes(attachment.content),
+    })) ?? [];
+    const result = await sendEmail(sender, email.toEmail, email.subject, email.body, attachments);
 
     // ─── Step 5a: Mark SENT ───────────────────────────────────────────────
     await prisma.email.update({
@@ -113,7 +123,7 @@ export async function sendEmailProcessor(
       },
     });
 
-    jobLog.info({ messageId: result.messageId, previewUrl: result.previewUrl }, 'Email sent ✓');
+    jobLog.info({ messageId: result.messageId }, 'Email sent');
 
     // Update Elasticsearch (non-critical)
     updateEmailInEs(emailId, {
@@ -123,7 +133,7 @@ export async function sendEmailProcessor(
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-    jobLog.error({ err }, 'Failed to send email');
+    jobLog.error({ errorName: err instanceof Error ? err.name : 'UnknownError' }, 'Failed to send email');
 
     // If we have retries left, BullMQ will redeliver. Keep status SCHEDULED so the
     // atomic claim can fire again on the retry attempt.

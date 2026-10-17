@@ -127,6 +127,7 @@ export interface UserDto {
     email: string;
     name: string;
     avatarUrl: string | null;
+    isAdmin: boolean;
 }
 export interface SenderDto {
     id: string;

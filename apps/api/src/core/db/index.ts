@@ -1,10 +1,12 @@
 import { prisma } from '@rs/db';
+import { migrateStoredSecrets } from '@rs/db';
 import { logger } from '../logger/index.js';
 
 export { prisma };
 
 export async function connectDb(): Promise<void> {
   await prisma.$connect();
+  await migrateStoredSecrets(prisma);
   logger.info('Connected to PostgreSQL via Prisma');
 }
 

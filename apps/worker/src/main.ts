@@ -15,6 +15,7 @@ async function main(): Promise<void> {
 
   const redis = getRedis();
 
+
   // Create a queue instance for reconcile
   const queue = new Queue<SendEmailJobData>(EMAIL_QUEUE, {
     connection: redis,
@@ -40,7 +41,7 @@ async function main(): Promise<void> {
   });
 
   worker.on('failed', (job, err) => {
-    logger.error({ jobId: job?.id, emailId: job?.data.emailId, err }, 'Job failed');
+    logger.error({ jobId: job?.id, emailId: job?.data.emailId, errorName: err.name }, 'Job failed');
   });
 
   worker.on('stalled', (jobId) => {
@@ -48,7 +49,7 @@ async function main(): Promise<void> {
   });
 
   worker.on('error', (err) => {
-    logger.error({ err }, 'Worker error');
+    logger.error({ errorName: err.name }, 'Worker error');
   });
 
   logger.info(
@@ -72,6 +73,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  logger.error({ err }, 'Worker failed to start');
+  logger.error({ errorName: err instanceof Error ? err.name : 'UnknownError' }, 'Worker failed to start');
   process.exit(1);
 });

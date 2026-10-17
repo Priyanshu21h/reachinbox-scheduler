@@ -4,6 +4,8 @@ import { sendersRouter } from './modules/senders/senders.routes.js';
 import { emailsRouter } from './modules/emails/emails.routes.js';
 import { searchRouter } from './modules/search/search.routes.js';
 import { slackRouter } from './modules/slack/slack.routes.js';
+import { statsRouter } from './modules/admin/stats.routes.js';
+
 
 export const apiRouter = Router();
 
@@ -16,3 +18,4 @@ apiRouter.use('/senders', sendersRouter);
 apiRouter.use('/emails', emailsRouter);
 apiRouter.use('/search', searchRouter);
 apiRouter.use('/slack', slackRouter);
+apiRouter.use('/stats', statsRouter);

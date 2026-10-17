@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { prisma } from '../../core/db/index.js';
 import { env } from '../../config/env.js';
 import { logger } from '../../core/logger/index.js';
+import { decryptSecret, encryptSecret } from '@rs/db';
 
 interface SlackOAuthResponse {
   ok: boolean;
@@ -19,7 +20,7 @@ interface SlackOAuthResponse {
 }
 
 export function generateState(userId: string): string {
-  const payload = JSON.stringify({ userId, nonce: crypto.randomBytes(16).toString('hex') });
+  const payload = JSON.stringify({ userId, nonce: crypto.randomBytes(16).toString('hex'), issuedAt: Date.now() });
   const hmac = crypto
     .createHmac('sha256', env.SLACK_STATE_SECRET)
     .update(payload)
@@ -35,8 +36,11 @@ export function verifyState(state: string): { userId: string } | null {
       .createHmac('sha256', env.SLACK_STATE_SECRET)
       .update(payload)
       .digest('hex');
-    if (!crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected))) return null;
-    const { userId } = JSON.parse(payload) as { userId: string };
+    const received = Buffer.from(hmac, 'hex');
+    const expectedBytes = Buffer.from(expected, 'hex');
+    if (received.length !== expectedBytes.length || !crypto.timingSafeEqual(received, expectedBytes)) return null;
+    const { userId, nonce, issuedAt } = JSON.parse(payload) as { userId: string; nonce: string; issuedAt: number };
+    if (!userId || !nonce || !Number.isFinite(issuedAt) || Date.now() - issuedAt > 10 * 60 * 1000 || issuedAt > Date.now() + 60_000) return null;
     return { userId };
   } catch {
     return null;
@@ -51,24 +55,31 @@ export async function exchangeSlackCode(code: string, userId: string): Promise<v
     redirect_uri: env.SLACK_REDIRECT_URI,
   });
 
-  const resp = await fetch(`https://slack.com/api/oauth.v2.access?${params.toString()}`);
+  const resp = await fetch('https://slack.com/api/oauth.v2.access', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
   const data = (await resp.json()) as SlackOAuthResponse;
 
   if (!data.ok || !data.incoming_webhook || !data.team) {
-    logger.error({ data }, 'Slack OAuth exchange failed');
-    throw new Error('Slack OAuth failed: ' + (data.error ?? 'unknown'));
+    logger.error({ slackError: data.error, ok: data.ok }, 'Slack OAuth exchange failed');
+    const reason = data.error || (!data.incoming_webhook ? 'missing incoming_webhook in response' : 'unknown error');
+    throw new Error(`Slack OAuth failed: ${reason}`);
   }
 
   await prisma.slackConnection.upsert({
     where: { userId },
     update: {
-      webhookUrl: data.incoming_webhook.url,
+      webhookUrl: encryptSecret(data.incoming_webhook.url),
       channel: data.incoming_webhook.channel,
       teamName: data.team.name,
     },
     create: {
       userId,
-      webhookUrl: data.incoming_webhook.url,
+      webhookUrl: encryptSecret(data.incoming_webhook.url),
       channel: data.incoming_webhook.channel,
       teamName: data.team.name,
     },

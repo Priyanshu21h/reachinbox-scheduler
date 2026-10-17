@@ -7,7 +7,8 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'wide';
+  panelClassName?: string;
 }
 
 const sizes = {
@@ -15,9 +16,10 @@ const sizes = {
   md: 'max-w-md',
   lg: 'max-w-2xl',
   xl: 'max-w-4xl',
+  wide: 'max-w-6xl',
 };
 
-export default function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, size = 'md', panelClassName = '' }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,19 +44,22 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-2 sm:p-4"
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
+      <div className="absolute inset-0 bg-slate-950/35 animate-fade-in" />
 
       {/* Panel */}
       <div
-        className={`relative w-full ${sizes[size]} glass-card shadow-2xl shadow-black/50 animate-slide-up`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`relative flex max-h-[calc(100vh-1rem)] max-h-[calc(100dvh-1rem)] w-full ${sizes[size]} flex-col overflow-hidden glass-card shadow-xl shadow-slate-900/10 animate-slide-up sm:max-h-[calc(100vh-2rem)] sm:max-h-[calc(100dvh-2rem)] ${panelClassName}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
+        <div className="flex shrink-0 items-center justify-between p-4 sm:p-5 border-b border-slate-200">
+          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           <Button
             variant="ghost"
             onClick={onClose}
@@ -68,7 +73,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
         </div>
 
         {/* Body */}
-        <div className="p-6">{children}</div>
+        <div className="min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-5">{children}</div>
       </div>
     </div>,
     document.body,

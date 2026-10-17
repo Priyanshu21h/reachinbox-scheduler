@@ -57,6 +57,9 @@ export async function checkHourlyLimit(
  * Resolves the effective hourly limit for a sender.
  * Uses sender override if set, otherwise falls back to env default.
  */
-export function effectiveHourlyLimit(senderHourlyLimit: number | null): number {
-  return senderHourlyLimit ?? env.MAX_EMAILS_PER_HOUR_PER_SENDER;
+export function effectiveHourlyLimit(
+  senderHourlyLimit: number | null,
+  emailHourlyLimit: number | null = null,
+): number {
+  return emailHourlyLimit ?? senderHourlyLimit ?? env.MAX_EMAILS_PER_HOUR_PER_SENDER;
 }

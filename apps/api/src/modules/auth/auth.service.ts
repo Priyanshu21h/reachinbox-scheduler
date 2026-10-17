@@ -7,10 +7,11 @@ export const googleOAuthClient = new OAuth2Client(
   env.GOOGLE_CALLBACK_URL,
 );
 
-export function getGoogleAuthUrl(): string {
+export function getGoogleAuthUrl(state: string): string {
   return googleOAuthClient.generateAuthUrl({
     access_type: 'offline',
     scope: ['profile', 'email'],
     prompt: 'select_account',
+    state,
   });
 }

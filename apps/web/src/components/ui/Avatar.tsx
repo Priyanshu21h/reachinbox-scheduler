@@ -19,14 +19,14 @@ export default function Avatar({ src, name, size = 'md' }: AvatarProps) {
       <img
         src={src}
         alt={name}
-        className={`${sizes[size]} rounded-full object-cover ring-2 ring-white/10`}
+        className={`${sizes[size]} rounded-full object-cover ring-2 ring-white`}
       />
     );
   }
 
   return (
     <div
-      className={`${sizes[size]} rounded-full bg-brand-600 text-white font-semibold flex items-center justify-center ring-2 ring-white/10`}
+      className={`${sizes[size]} rounded-full bg-indigo-100 text-indigo-700 font-semibold flex items-center justify-center ring-2 ring-white`}
     >
       {initials}
     </div>

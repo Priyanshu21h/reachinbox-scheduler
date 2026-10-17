@@ -10,10 +10,10 @@
     "infra:down": "docker compose -f infra/docker-compose.yml down",
     "db:migrate": "dotenv -e .env -- npm run migrate --workspace=packages/db",
     "db:generate": "dotenv -e .env -- npm run generate --workspace=packages/db",
-    "dev:api": "npm run dev --workspace=apps/api",
-    "dev:worker": "npm run dev --workspace=apps/worker",
+    "dev:api": "dotenv -e .env -- npm run dev --workspace=apps/api",
+    "dev:worker": "dotenv -e .env -- npm run dev --workspace=apps/worker",
     "dev:web": "npm run dev --workspace=apps/web",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace=packages/shared && npm run build --workspace=packages/db && npm run build --workspace=apps/api && npm run build --workspace=apps/worker && npm run build --workspace=apps/web",
     "test": "npm run test --workspaces --if-present"
   },
   "engines": {

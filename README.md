@@ -131,6 +131,13 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_CALLBACK_URL=http://localhost:4000/auth/google/callback
 
+# Required only if enabling email/password registration or password resets
+AUTH_EMAIL_SMTP_HOST=smtp.example.com
+AUTH_EMAIL_SMTP_PORT=587
+AUTH_EMAIL_SMTP_USER=your-smtp-username
+AUTH_EMAIL_SMTP_PASS=your-smtp-password-or-app-password
+AUTH_EMAIL_FROM=no-reply@example.com
+
 # Optional: Slack OAuth credentials for Slack alerts
 SLACK_CLIENT_ID=your-slack-client-id
 SLACK_CLIENT_SECRET=your-slack-client-secret
@@ -220,7 +227,7 @@ Detailed test procedure: See [.agent/workflows/verify-restart.md](file:///c:/Dis
 When 1,000 emails are scheduled to send:
 1. Each recipient gets an exact scheduled send timestamp staggered by `delayBetweenEmailsMs`.
 2. As jobs become due, the BullMQ worker picks them up concurrently (controlled by `WORKER_CONCURRENCY`).
-3. The atomic Redis Lua script checks against `MAX_EMAILS_PER_HOUR_PER_SENDER`.
+3. The atomic Redis Lua script checks a per-email hourly limit saved from the Compose form; when omitted, it falls back to the sender limit, then `MAX_EMAILS_PER_HOUR_PER_SENDER`.
 4. Once the hourly limit is exhausted, excess emails are non-destructively rescheduled to the next hour window (`nextHourWindowStart + (scheduledAt % 3600000)`).
 5. No jobs are dropped, no memory leaks occur, and order within windows is preserved.
 

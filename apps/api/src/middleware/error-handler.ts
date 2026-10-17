@@ -10,9 +10,9 @@ export function errorHandler(
 ): void {
   if (err instanceof AppError) {
     if (err.statusCode >= 500) {
-      logger.error({ err }, err.message);
+      logger.error({ code: err.code, statusCode: err.statusCode }, err.message);
     } else {
-      logger.warn({ err }, err.message);
+      logger.warn({ code: err.code, statusCode: err.statusCode }, err.message);
     }
     res.status(err.statusCode).json({
       error: {
@@ -25,7 +25,8 @@ export function errorHandler(
   }
 
   // Unknown errors
-  logger.error({ err }, 'Unhandled error');
+  // Error objects can contain SQL parameters, OAuth responses, or request details.
+  logger.error({ errorName: err.name }, 'Unhandled error');
   res.status(500).json({
     error: {
       code: 'INTERNAL_SERVER_ERROR',

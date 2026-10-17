@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "tsx watch --include ../../.env src/main.ts",
     "build": "tsc",
     "start": "node dist/main.js",
     "test": "vitest run"
@@ -14,7 +14,7 @@
     "bullmq": "^5.10.4",
     "dotenv": "^18.0.8",
     "ioredis": "^5.4.1",
-    "nodemailer": "^6.9.14",
+    "nodemailer": "^10.1.2",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.2",
     "zod": "^3.23.8"
@@ -24,7 +24,6 @@
     "@types/node": "^20.14.9",
     "@types/nodemailer": "^6.4.15",
     "ioredis-mock": "^8.13.1",
-    "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   }

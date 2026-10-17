@@ -28,7 +28,11 @@ export async function oauthCallback(
   try {
     const { code, state, error } = req.query as Record<string, string>;
     if (error) {
-      res.redirect(`${env.FRONTEND_URL}/dashboard?slack_error=${error}`);
+      res.redirect(`${env.FRONTEND_URL}/dashboard?slack_error=authorization_denied`);
+      return;
+    }
+    if (!code) {
+      res.redirect(`${env.FRONTEND_URL}/dashboard?slack_error=missing_code`);
       return;
     }
 
@@ -38,11 +42,12 @@ export async function oauthCallback(
       return;
     }
 
-    await exchangeSlackCode(code!, verified.userId);
+    await exchangeSlackCode(code, verified.userId);
     logger.info({ userId: verified.userId }, 'Slack connected');
     res.redirect(`${env.FRONTEND_URL}/dashboard?slack=connected`);
   } catch (err) {
-    next(err);
+    logger.error({ errorName: err instanceof Error ? err.name : 'UnknownError' }, 'Failed to exchange Slack OAuth code');
+    res.redirect(`${env.FRONTEND_URL}/dashboard?slack_error=connection_failed`);
   }
 }
 

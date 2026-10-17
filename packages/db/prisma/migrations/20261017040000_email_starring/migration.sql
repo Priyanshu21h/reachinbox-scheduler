@@ -1,0 +1,1 @@
+ALTER TABLE "Email" ADD COLUMN "isStarred" BOOLEAN NOT NULL DEFAULT false;

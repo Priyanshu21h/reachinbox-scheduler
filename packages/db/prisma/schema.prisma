@@ -12,15 +12,36 @@ datasource db {
 
 model User {
   id         String   @id @default(cuid())
-  googleId   String   @unique
+  googleId   String?  @unique
   email      String   @unique
   name       String
   avatarUrl  String?
+  passwordHash String?
+  emailVerifiedAt DateTime?
   createdAt  DateTime @default(now())
 
   senders         Sender[]
   emails          Email[]
+  storedAttachments StoredAttachment[]
   slackConnection SlackConnection?
+}
+
+enum AuthTokenPurpose {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+model AuthToken {
+  id        String           @id @default(cuid())
+  email     String
+  name      String?
+  tokenHash String           @unique
+  purpose   AuthTokenPurpose
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([email, purpose, expiresAt])
 }
 
 model Sender {
@@ -53,9 +74,12 @@ model Email {
   subject     String
   body        String
   scheduledAt DateTime
+  hourlyLimit Int?
   sentAt      DateTime?
   status      EmailStatus @default(SCHEDULED)
   attempts    Int         @default(0)
+  sizeBytes   Int         @default(0)
+  isStarred   Boolean     @default(false)
   messageId   String?
   error       String?
   createdAt   DateTime    @default(now())
@@ -63,9 +87,33 @@ model Email {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   sender Sender @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  attachments EmailAttachment[]
 
   @@index([userId, status, scheduledAt])
   @@index([status, scheduledAt])
+}
+
+model StoredAttachment {
+  id          String            @id @default(cuid())
+  userId      String
+  fileName    String
+  contentType String
+  sizeBytes   Int
+  content     Bytes
+  createdAt   DateTime          @default(now())
+  emails      EmailAttachment[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailAttachment {
+  emailId      String
+  attachmentId String
+  email        Email           @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  attachment   StoredAttachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  @@id([emailId, attachmentId])
+  @@index([attachmentId])
 }
 
 model SlackConnection {

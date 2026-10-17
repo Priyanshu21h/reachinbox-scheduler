@@ -45,6 +45,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  logger.error({ err }, 'Failed to start server');
+  logger.error({ errorName: err instanceof Error ? err.name : 'UnknownError' }, 'Failed to start server');
   process.exit(1);
 });
