@@ -3,7 +3,7 @@
 A production-grade email scheduling service with a dashboard. It accepts email send requests, schedules them for an exact time with **BullMQ delayed jobs on Redis (no cron anywhere)**, sends through **Ethereal SMTP** from multiple senders, and survives server and worker restarts with no lost jobs and no duplicate sends.
 
 - Demo video: `<VIDEO_LINK>`
-- Live demo (Google Cloud VM): https://35-207-219-20.sslip.io/login (remove this line if the VM is switched off)
+- Live demo (Google Cloud VM): https://35-207-219-20.sslip.io/login 
 
 ---
 
